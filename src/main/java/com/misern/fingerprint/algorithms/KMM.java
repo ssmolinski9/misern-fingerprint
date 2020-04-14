@@ -8,6 +8,7 @@ import java.util.List;
 public class KMM {
     int [] valueMask = calculateValueMask();
     HashMap numbersToDelete = (HashMap) countDeleteNumbers();
+    int [][] previousArray;
 
     private int[] calculateValueMask() {
 
@@ -18,50 +19,58 @@ public class KMM {
         return valueMask;
     }
 
-    public BufferedImage calculate(BufferedImage img){
+    public void calculate(BufferedImage img){
         int width = img.getWidth();
         int height = img.getHeight();
         int array[][] = new int[width][height];
-
+        previousArray = new int[width][height];
         for(int i = 0; i < width; i++){
             for(int j = 0; j < height; j++){
                 array[i][j] = 0;
             }
         }
 
-        for(int i = 0; i < width; i++){
-            for(int j = 0; j < height; j++){
+        for(int i = 1; i < width-1; i++){
+            for(int j = 1; j < height-1; j++){
                 Color c = new Color(img.getRGB(i,j));
                 if(c.equals(Color.BLACK)){
                     array[i][j] = 1;
                 }
             }
         }
+        System.out.println(array[0][0]);
         do{
-            for(int i = 1; i < width; i++){
-                for(int j = 1; j < height; j++){
+            for(int i = 1; i < width-1; i++){
+                for(int j = 1; j < height-1; j++){
                     if((array[i][j] == 1 && ((array[i + 1][j] == 0) || (array[i - 1][j] == 0) || (array[i][j + 1] == 0) || (array[i][j - 1] == 0)))){
                         array[i][j] = 2;
                     }
                 }
             }
 
-            for(int i = 1; i < width; i++){
-                for(int j = 1; j < height; j++){
+            for(int i = 1; i < width-1; i++){
+                for(int j = 1; j < height-1; j++){
                     if((array[i][j] == 1 && ((array[i + 1][j + 1] == 0) || (array[i - 1][j - 1] == 0) || (array[i - 1][j + 1] == 0) || (array[i + 1][j - 1] == 0)))){
                         array[i][j] = 3;
                     }
                 }
             }
 
-            for(int i = 1; i < width; i++){
-                for(int j = 1; j < height; j++){
+            for(int i = 1; i < width-1; i++){
+                for(int j = 1; j < height-1; j++){
                     if(array[i][j] == 2 && checkIfCorner(array,i,j)){
                         array[i][j] = 4;
                     }
                 }
             }
-
+            /*for(int i = 1; i < height; i++){
+                for(int j = 1; j < width; j++){
+                    if(array [j][i] == 0) System.out.print(' ');
+                    else{
+                        System.out.print(array[j][i]);
+                    }
+                }System.out.println();
+            }*/
 
 
             for(int i = 1; i < width; i++){
@@ -73,8 +82,8 @@ public class KMM {
                 }
             }
 
-            for(int i = 1; i < width; i++){
-                for(int j = 1; j < height; j++){
+            for(int i = 1; i < width-1; i++){
+                for(int j = 1; j < height-1; j++){
                     if(array[i][j] == 2){
                         if(calculateValueForDelete(array, i, j)){
                             array[i][j] = 0;
@@ -86,30 +95,21 @@ public class KMM {
                 }
             }
 
-            for(int i = 1; i < height; i++){
-                for(int j = 1; j < width; j++){
-                    if(array[j][i] == 3){
-                        if(calculateValueForDelete(array, j, i)){
-                            array[j][i] = 0;
-                            img.setRGB(j,i,Color.WHITE.getRGB());
+            for(int i = 1; i < width-1; i++){
+                for(int j = 1; j < height-1; j++){
+                    if(array[i][j] == 3){
+                        if(calculateValueForDelete(array, i, j)){
+                            img.setRGB(i,j,Color.WHITE.getRGB());
+                            array[i][j] = 0;
                         }else{
-                            array[j][i] = 1;
+                            array[i][j] = 1;
                         }
                     }
                 }
             }
-        } while(!checkIfDone(array,width,height));
 
-        for(int i = 1; i < height; i++){
-            for(int j = 1; j < width; j++){
-                if(array [j][i] == 0) System.out.print(' ');
-                else{
-                    System.out.print(array[j][i]);
-                }
-            }System.out.println();
-        }
 
-        return null;
+        } while(!isExact(array,width,height));
     }
 
 
@@ -134,6 +134,69 @@ public class KMM {
         if(array[i+1][j] != 0) result++;
         if(array[i-1][j] != 0) result++;
         return result;
+    }
+
+    private boolean checkNeighbors(int [][] array, int i, int j){
+        if(!checkIfCorner(array,i,j)) return false;
+        int result = 0;
+        if(array[i+1][j+1] != 0) result++;
+        if(array[i-1][j+1] != 0) result++;
+        if(array[i+1][j-1] != 0) result++;
+        if(array[i-1][j-1] != 0) result++;
+        if(array[i][j+1] != 0) result++;
+        if(array[i][j-1] != 0) result++;
+        if(array[i+1][j] != 0) result++;
+        if(array[i-1][j] != 0) result++;
+        if(result == 2 || result == 3 || result == 4) return true;
+        return false;
+    }
+
+    private boolean isExact(int [][] array, int width, int height){
+        for (int i = 1; i < width-1; i++){
+            for (int j = 1; j < height-1; j++){
+                if(array[i][j] != previousArray[i][j]){
+                    deepCopy(array,previousArray,width,height);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void deepCopy(int [][] arrayFrom, int [][] arrayTo, int width, int height){
+        for (int i = 1; i < width-1; i++){
+            for (int j = 1; j < height-1; j++){
+                arrayTo[i][j] = arrayFrom[i][j];
+            }
+        }
+    }
+
+    private boolean checkIfCorner0(int [][] array, int i, int j){
+        int valueWithoutPixel = 0;
+
+        if(array[i][j-1] == 0) valueWithoutPixel++;
+        if(array[i+1][j-1] == 0) valueWithoutPixel++;
+        if(array[i+1][j] == 0) valueWithoutPixel++;
+        if(valueWithoutPixel == 3) return true;
+        valueWithoutPixel = 0;
+
+        if(array[i+1][j] == 0) valueWithoutPixel++;
+        if(array[i+1][j+1] == 0) valueWithoutPixel++;
+        if(array[i][j+1] == 0) valueWithoutPixel++;
+        if(valueWithoutPixel == 3) return true;
+        valueWithoutPixel = 0;
+
+        if(array[i][j+1] == 0) valueWithoutPixel++;
+        if(array[i-1][j+1] == 0) valueWithoutPixel++;
+        if(array[i-1][j] == 0) valueWithoutPixel++;
+        if(valueWithoutPixel == 3) return true;
+        valueWithoutPixel = 0;
+
+        if(array[i-1][j] == 0) valueWithoutPixel++;
+        if(array[i-1][j-1] == 0) valueWithoutPixel++;
+        if(array[i][j-1] == 0) valueWithoutPixel++;
+        if(valueWithoutPixel == 3) return true;
+        return false;
     }
 
     private boolean checkIfCorner(int [][] array, int i, int j){
@@ -233,62 +296,6 @@ public class KMM {
                 247,    248,    249,    251,    252,    253,    254,    255));
         set.forEach(number -> numbers.put(number, 1));
         return numbers;
-    /*for(int i = 0; i < 7; i++){
-        numbers.put(array[i] + array[i+1],1);
-        for(int j = i+2; j < 7; j++){
-            numbers.put(array[i] + array[i+1] + array[j], 1);
-            for(int k = j+1; k < 7; k++){
-                numbers.put(array[i] + array[i+1] + array[j] + array[k], 1);
-                for(int l = k+1; l < 7; l++){
-                    numbers.put(array[i] + array[i+1] + array[j] + array[k] + array[l], 1);
-                    for(int m = l+1; m < 7; m++){
-                        numbers.put(array[i] + array[i+1] + array[j] + array[k] + array[l] + array[m], 1);
-                        for(int n = m+1; n < 7; n++){
-                            numbers.put(array[i] + array[i+1] + array[j] + array[k] + array[l] + array[m] + array[n], 1);
-                        }
-                    }
-                }
-            }
-        }
-    }*/
-    /*int value = 0;
-    for(int i = 0; i < 6; i++){
-        value = 0;
-        value = array[i] + array[i+1] + array[i+2];
-        numbers.put(value,1);
-        for(int j = i+3; j < 8; j++){
-            numbers.put(value + array[j],1);
-            for(int k = j+1; k < 8; k++){
-                numbers.put(value + array[j] + array[k],1);
-                for(int l = k+1; l < 8; l++){
-                    numbers.put(value + array[j] + array[k] + array[l],1);
-                    for(int m = l+1; m < 8; m++){
-                        numbers.put(value + array[j] + array[k] + array[l] + array[m],1);
-                    }
-                }
-            }
-        }
-    }
-    for(int a = 0; a < 8; a+=2) {
-        value = array[a] + array[a+1];
-        for(int i = 0; i < 6; i++){
-            value = 0;
-            value = array[i] + array[i + 1] + array[i + 2];
-            numbers.put(value, 1);
-            for(int j = i + 3; j < 8; j++){
-                numbers.put(value + array[j], 1);
-                for(int k = j + 1; k < 8; k++){
-                    numbers.put(value + array[j] + array[k], 1);
-                    for(int l = k + 1; l < 8; l++){
-                        numbers.put(value + array[j] + array[k] + array[l], 1);
-                        for(int m = l + 1; m < 8; m++){
-                            numbers.put(value + array[j] + array[k] + array[l] + array[m], 1);
-                        }
-                    }
-                }
-            }
-        }
-    }*/
     }
 
     private boolean checkIfDone(int [][]array, int width, int height){
@@ -296,7 +303,7 @@ public class KMM {
             for(int j = 1; j < height; j++){
                 if(array[i][j] != 0){
                     if(countCross(array,i,j) > 2){
-                        System.out.println(i + " " + j + " " + countCross(array,i,j) + " " + countCorners(array,i,j));
+                        //System.out.println(i + " " + j + " " + countCross(array,i,j) + " " + countCorners(array,i,j));
                         return false;
                     }
                 }

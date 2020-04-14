@@ -77,7 +77,7 @@ public class Dashboard extends JFrame {
             image = otsuAlgorithm.binarize(image);
             imagePanel.setImage(image);
 
-            image = kmmAlgorithm.calculate(image);
+            kmmAlgorithm.calculate(image);
             imagePanel.setImage(image);
         }
     }

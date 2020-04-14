@@ -18,7 +18,7 @@ public class Otsu {
             for (int y = 0; y < image.getHeight(); y++) {
                 Color pixelColor = new Color(image.getRGB(x, y));
                 int colorValue = pixelColor.getRed();
-                image.setRGB(x, y, colorValue > threshold ? Color.BLACK.getRGB() : Color.WHITE.getRGB());
+                image.setRGB(x, y, colorValue > threshold ? Color.WHITE.getRGB() : Color.BLACK.getRGB());
             }
         }
 
