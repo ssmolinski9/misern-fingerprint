@@ -5,6 +5,9 @@ import com.misern.fingerprint.algorithms.ds.Histogram;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+/**
+ * Binarization algorithm depending on Otsu's method
+ */
 public class Otsu {
     /**
      * Binarize provided image with Otsu's method.

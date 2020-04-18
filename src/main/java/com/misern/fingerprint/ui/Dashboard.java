@@ -3,6 +3,7 @@ package com.misern.fingerprint.ui;
 import com.misern.fingerprint.actions.contorls.ExitActionHandler;
 import com.misern.fingerprint.actions.contorls.OpenFileActionHandler;
 import com.misern.fingerprint.algorithms.KMM;
+import com.misern.fingerprint.algorithms.MedianFilter;
 import com.misern.fingerprint.algorithms.Otsu;
 
 import javax.swing.JFrame;
@@ -71,10 +72,14 @@ public class Dashboard extends JFrame {
     public void handleImageChange() {
         Otsu otsuAlgorithm = new Otsu();
         KMM kmmAlgorithm = new KMM();
+        MedianFilter medianFilter = new MedianFilter();
 
         if (imagePanel.getOriginalImage() != null) {
             BufferedImage image = imagePanel.getOriginalImage();
             image = otsuAlgorithm.binarize(image);
+            imagePanel.setImage(image);
+
+            image = medianFilter.filter(image, 9);
             imagePanel.setImage(image);
 
             kmmAlgorithm.calculate(image);
