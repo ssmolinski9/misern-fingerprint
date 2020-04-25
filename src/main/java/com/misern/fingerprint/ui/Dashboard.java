@@ -2,6 +2,7 @@ package com.misern.fingerprint.ui;
 
 import com.misern.fingerprint.actions.contorls.ExitActionHandler;
 import com.misern.fingerprint.actions.contorls.OpenFileActionHandler;
+import com.misern.fingerprint.actions.contorls.SaveFileActionHandler;
 import com.misern.fingerprint.algorithms.KMM;
 import com.misern.fingerprint.algorithms.MedianFilter;
 import com.misern.fingerprint.algorithms.Otsu;
@@ -55,6 +56,7 @@ public class Dashboard extends JFrame {
 
     private void createActionListeners() {
         openFileItem.addActionListener(new OpenFileActionHandler(this));
+        saveFileItem.addActionListener(new SaveFileActionHandler(this));
         exitItem.addActionListener(new ExitActionHandler(this));
     }
 

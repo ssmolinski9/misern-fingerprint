@@ -1,5 +1,7 @@
 package com.misern.fingerprint.utils;
 
+import org.apache.commons.io.FilenameUtils;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -26,5 +28,18 @@ public class FileUtils {
         }
 
         return image;
+    }
+
+    /**
+     * Saves file to specified file
+     * @param file File to save image's data
+     * @param originalImage Image to save
+     */
+    public static void saveImage(File file, BufferedImage originalImage) {
+        try {
+            ImageIO.write(originalImage, FilenameUtils.getExtension(file.getName()), file);
+        } catch (IOException ex) {
+            System.out.println("Failed to save image: " + ex.getMessage());
+        }
     }
 }
