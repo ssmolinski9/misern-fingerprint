@@ -10,15 +10,6 @@ public class KMM {
     HashMap numbersToDelete = (HashMap) countDeleteNumbers();
     int [][] previousArray;
 
-    private int[] calculateValueMask() {
-
-        int [] valueMask = new int[8];
-        for(int i = 0; i < 8; i++){
-            valueMask[i] = (int) Math.pow(2,i);
-        }
-        return valueMask;
-    }
-
     public void calculate(BufferedImage img){
         int width = img.getWidth();
         int height = img.getHeight();
@@ -38,8 +29,11 @@ public class KMM {
                 }
             }
         }
-        System.out.println(array[0][0]);
+
+        boolean ifChanged;
+
         do{
+            ifChanged = false;
             for(int i = 1; i < width-1; i++){
                 for(int j = 1; j < height-1; j++){
                     if((array[i][j] == 1 && ((array[i + 1][j] == 0) || (array[i - 1][j] == 0) || (array[i][j + 1] == 0) || (array[i][j - 1] == 0)))){
@@ -63,19 +57,11 @@ public class KMM {
                     }
                 }
             }
-            /*for(int i = 1; i < height; i++){
-                for(int j = 1; j < width; j++){
-                    if(array [j][i] == 0) System.out.print(' ');
-                    else{
-                        System.out.print(array[j][i]);
-                    }
-                }System.out.println();
-            }*/
-
 
             for(int i = 1; i < width; i++){
                 for(int j = 1; j < height; j++){
                     if(array[i][j] == 4){
+                        ifChanged = true;
                         array[i][j] = 0;
                         img.setRGB(i,j,Color.WHITE.getRGB());
                     }
@@ -86,6 +72,7 @@ public class KMM {
                 for(int j = 1; j < height-1; j++){
                     if(array[i][j] == 2){
                         if(calculateValueForDelete(array, i, j)){
+                            ifChanged = true;
                             array[i][j] = 0;
                             img.setRGB(i,j,Color.WHITE.getRGB());
                         }else{
@@ -100,6 +87,7 @@ public class KMM {
                     if(array[i][j] == 3){
                         if(calculateValueForDelete(array, i, j)){
                             img.setRGB(i,j,Color.WHITE.getRGB());
+                            ifChanged = true;
                             array[i][j] = 0;
                         }else{
                             array[i][j] = 1;
@@ -109,94 +97,7 @@ public class KMM {
             }
 
 
-        } while(!isExact(array,width,height));
-    }
-
-
-    private int countCorners(int [][] array, int i, int j){
-        int result = 0;
-        if(array[i+1][j+1] != 0) result++;
-        if(array[i-1][j+1] != 0) result++;
-        if(array[i+1][j-1] != 0) result++;
-        if(array[i-1][j-1] != 0) result++;
-        return result;
-    }
-
-    private int countVertical(int [][] array, int i, int j){
-        int result = 0;
-        if(array[i][j+1] != 0) result++;
-        if(array[i][j-1] != 0) result++;
-        return result;
-    }
-
-    private int countHorizontal(int [][] array, int i, int j){
-        int result = 0;
-        if(array[i+1][j] != 0) result++;
-        if(array[i-1][j] != 0) result++;
-        return result;
-    }
-
-    private boolean checkNeighbors(int [][] array, int i, int j){
-        if(!checkIfCorner(array,i,j)) return false;
-        int result = 0;
-        if(array[i+1][j+1] != 0) result++;
-        if(array[i-1][j+1] != 0) result++;
-        if(array[i+1][j-1] != 0) result++;
-        if(array[i-1][j-1] != 0) result++;
-        if(array[i][j+1] != 0) result++;
-        if(array[i][j-1] != 0) result++;
-        if(array[i+1][j] != 0) result++;
-        if(array[i-1][j] != 0) result++;
-        if(result == 2 || result == 3 || result == 4) return true;
-        return false;
-    }
-
-    private boolean isExact(int [][] array, int width, int height){
-        for (int i = 1; i < width-1; i++){
-            for (int j = 1; j < height-1; j++){
-                if(array[i][j] != previousArray[i][j]){
-                    deepCopy(array,previousArray,width,height);
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    void deepCopy(int [][] arrayFrom, int [][] arrayTo, int width, int height){
-        for (int i = 1; i < width-1; i++){
-            for (int j = 1; j < height-1; j++){
-                arrayTo[i][j] = arrayFrom[i][j];
-            }
-        }
-    }
-
-    private boolean checkIfCorner0(int [][] array, int i, int j){
-        int valueWithoutPixel = 0;
-
-        if(array[i][j-1] == 0) valueWithoutPixel++;
-        if(array[i+1][j-1] == 0) valueWithoutPixel++;
-        if(array[i+1][j] == 0) valueWithoutPixel++;
-        if(valueWithoutPixel == 3) return true;
-        valueWithoutPixel = 0;
-
-        if(array[i+1][j] == 0) valueWithoutPixel++;
-        if(array[i+1][j+1] == 0) valueWithoutPixel++;
-        if(array[i][j+1] == 0) valueWithoutPixel++;
-        if(valueWithoutPixel == 3) return true;
-        valueWithoutPixel = 0;
-
-        if(array[i][j+1] == 0) valueWithoutPixel++;
-        if(array[i-1][j+1] == 0) valueWithoutPixel++;
-        if(array[i-1][j] == 0) valueWithoutPixel++;
-        if(valueWithoutPixel == 3) return true;
-        valueWithoutPixel = 0;
-
-        if(array[i-1][j] == 0) valueWithoutPixel++;
-        if(array[i-1][j-1] == 0) valueWithoutPixel++;
-        if(array[i][j-1] == 0) valueWithoutPixel++;
-        if(valueWithoutPixel == 3) return true;
-        return false;
+        } while(ifChanged);
     }
 
     private boolean checkIfCorner(int [][] array, int i, int j){
@@ -209,8 +110,8 @@ public class KMM {
         checkList.add(array[i-1][j+1]);
         checkList.add(array[i-1][j]);
         checkList.add(array[i-1][j-1]);
-        int valueWithPixels = 0;
-        int valueWithoutPixels = 0;
+        int valueWithPixels;
+        int valueWithoutPixels;
         for(int a = 0; a < 8; a++){
             valueWithPixels = 0;
             valueWithoutPixels = 0;
@@ -245,15 +146,6 @@ public class KMM {
             if(valueWithPixels == 4 && valueWithoutPixels == 4) return true;
         }
         return false;
-    }
-
-    private int countCross(int [][] array, int i, int j){
-        int result = 0;
-        if(array[i][j+1] != 0) result++;
-        if(array[i-1][j] != 0) result++;
-        if(array[i][j-1] != 0) result++;
-        if(array[i+1][j] != 0) result++;
-        return result;
     }
 
     private boolean calculateValueForDelete(int [][]array, int i, int j){
@@ -298,17 +190,12 @@ public class KMM {
         return numbers;
     }
 
-    private boolean checkIfDone(int [][]array, int width, int height){
-        for(int i = 1; i < width; i++){
-            for(int j = 1; j < height; j++){
-                if(array[i][j] != 0){
-                    if(countCross(array,i,j) > 2){
-                        //System.out.println(i + " " + j + " " + countCross(array,i,j) + " " + countCorners(array,i,j));
-                        return false;
-                    }
-                }
-            }
+    private int[] calculateValueMask() {
+
+        int [] valueMask = new int[8];
+        for(int i = 0; i < 8; i++){
+            valueMask[i] = (int) Math.pow(2,i);
         }
-        return true;
+        return valueMask;
     }
 }
