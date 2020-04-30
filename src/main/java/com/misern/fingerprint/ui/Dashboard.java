@@ -27,6 +27,11 @@ public class Dashboard extends JFrame {
 
     private final ImagePanel imagePanel = new ImagePanel();
 
+    private final Otsu otsuAlgorithm = new Otsu();
+    private final KMM kmmAlgorithm = new KMM();
+    private final MedianFilter medianFilter = new MedianFilter();
+    private final CrossingNumber cn = new CrossingNumber();
+
     /**
      * Creates dashboard frame with menu bar and image panel
      */
@@ -59,37 +64,84 @@ public class Dashboard extends JFrame {
         openFileItem.addActionListener(new OpenFileActionHandler(this));
         saveFileItem.addActionListener(new SaveFileActionHandler(this));
         exitItem.addActionListener(new ExitActionHandler(this));
+
+        imagePanel.getAutoProcessButton().addActionListener(ev -> autoprocess());
+        imagePanel.getOtsuButton().addActionListener(ev -> binarize());
+        imagePanel.getFilterButton().addActionListener(ev -> filter());
+        imagePanel.getKmmButton().addActionListener(ev -> kmm());
+        imagePanel.getRemoveMinutiae().addActionListener(ev -> minutiae());
     }
 
     public ImagePanel getImagePanel() {
         return imagePanel;
     }
 
-    /**
-     * Starts main application process:
-     * Otsu's algorithm
-     * Median filtering
-     * KMM algorithm
-     * Additional operations
-     */
-    public void handleImageChange() {
-        Otsu otsuAlgorithm = new Otsu();
-        KMM kmmAlgorithm = new KMM();
-        MedianFilter medianFilter = new MedianFilter();
-        CrossingNumber cn = new CrossingNumber();
-        if (imagePanel.getOriginalImage() != null) {
-            BufferedImage image = imagePanel.getOriginalImage();
-            image = otsuAlgorithm.binarize(image);
-            imagePanel.setImage(image);
+    public void activateButtons() {
+        imagePanel.getAutoProcessButton().setEnabled(true);
+        imagePanel.getOtsuButton().setEnabled(true);
+        imagePanel.getFilterButton().setEnabled(true);
+        imagePanel.getKmmButton().setEnabled(true);
+        imagePanel.getRemoveMinutiae().setEnabled(true);
+    }
 
-            image = medianFilter.filter(image, 3);
-            imagePanel.setImage(image);
+    private void deactivateButtons() {
+        imagePanel.getAutoProcessButton().setEnabled(false);
+        imagePanel.getOtsuButton().setEnabled(false);
+        imagePanel.getFilterButton().setEnabled(false);
+        imagePanel.getKmmButton().setEnabled(false);
+        imagePanel.getRemoveMinutiae().setEnabled(false);
+    }
 
-            kmmAlgorithm.calculate(image);
-            imagePanel.setImage(image);
+    private void autoprocess() {
+        BufferedImage image = imagePanel.getOriginalImage();
+        image = otsuAlgorithm.binarize(image);
+        imagePanel.setImage(image);
 
-            image = cn.findMinutiae(image);
-            imagePanel.setImage(image);
-        }
+        image = medianFilter.filter(image, 3);
+        imagePanel.setImage(image);
+
+        kmmAlgorithm.calculate(image);
+        imagePanel.setImage(image);
+
+        image = cn.findMinutiae(image);
+        imagePanel.setImage(image);
+
+        deactivateButtons();
+    }
+
+    private void binarize() {
+        BufferedImage image = imagePanel.getOriginalImage();
+        image = otsuAlgorithm.binarize(image);
+        imagePanel.setImage(image);
+
+        imagePanel.getOtsuButton().setEnabled(false);
+        imagePanel.getAutoProcessButton().setEnabled(false);
+    }
+
+    private void filter() {
+        BufferedImage image = imagePanel.getOriginalImage();
+        image = medianFilter.filter(image, 3);
+        imagePanel.setImage(image);
+
+        imagePanel.getFilterButton().setEnabled(false);
+        imagePanel.getAutoProcessButton().setEnabled(false);
+    }
+
+    private void kmm() {
+        BufferedImage image = imagePanel.getOriginalImage();
+        kmmAlgorithm.calculate(image);
+        imagePanel.setImage(image);
+
+        imagePanel.getKmmButton().setEnabled(false);
+        imagePanel.getAutoProcessButton().setEnabled(false);
+    }
+
+    private void minutiae() {
+        BufferedImage image = imagePanel.getOriginalImage();
+        image = cn.findMinutiae(image);
+        imagePanel.setImage(image);
+
+        imagePanel.getRemoveMinutiae().setEnabled(false);
+        imagePanel.getAutoProcessButton().setEnabled(false);
     }
 }

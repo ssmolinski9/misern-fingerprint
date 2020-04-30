@@ -1,8 +1,11 @@
 package com.misern.fingerprint.ui;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
+import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
 
 /**
@@ -11,6 +14,29 @@ import java.awt.image.BufferedImage;
 public class ImagePanel extends JPanel {
 
     private BufferedImage originalImage;
+
+    private final JButton autoProcessButton = new JButton("Auto process");
+
+    private final JButton otsuButton = new JButton("Otsu binarization");
+
+    private final JButton filterButton = new JButton("Filter");
+
+    private final JButton kmmButton = new JButton("KMM");
+
+    private final JButton removeMinutiae = new JButton("Remove minutiae");
+
+    public ImagePanel() {
+        setLayout(new BorderLayout());
+
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 5));
+        buttonPanel.add(autoProcessButton);
+        buttonPanel.add(otsuButton);
+        buttonPanel.add(filterButton);
+        buttonPanel.add(kmmButton);
+        buttonPanel.add(removeMinutiae);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
 
     /**
      * Paints image inside panel.
@@ -39,9 +65,30 @@ public class ImagePanel extends JPanel {
      */
     public void setImage(BufferedImage image) {
         this.originalImage = image;
+        repaint();
     }
 
     public BufferedImage getOriginalImage() {
         return originalImage;
+    }
+
+    public JButton getAutoProcessButton() {
+        return autoProcessButton;
+    }
+
+    public JButton getOtsuButton() {
+        return otsuButton;
+    }
+
+    public JButton getFilterButton() {
+        return filterButton;
+    }
+
+    public JButton getKmmButton() {
+        return kmmButton;
+    }
+
+    public JButton getRemoveMinutiae() {
+        return removeMinutiae;
     }
 }

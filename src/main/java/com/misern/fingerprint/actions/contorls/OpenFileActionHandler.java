@@ -36,7 +36,7 @@ public class OpenFileActionHandler implements ActionListener {
             loadImage(imageOpener.getSelectedFile());
         }
 
-        dashboard.handleImageChange();
+        dashboard.activateButtons();
     }
 
     private void loadImage(File file) {
