@@ -1,17 +1,23 @@
 package com.misern.fingerprint.algorithms;
 
+import com.misern.fingerprint.model.Minutia;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class CrossingNumber {
+
     public BufferedImage findMinutiae(BufferedImage orginal) {
         BufferedImage deepCopy = deepCopy(orginal);
         int width = deepCopy.getWidth();
         int height = deepCopy.getHeight();
         double cn = 0;
         int[][] binArray = new int[width][height];
+        ArrayList<Minutia> minutias = new ArrayList<>();
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -40,26 +46,91 @@ public class CrossingNumber {
 
                     cn = cn * 0.5;
 
-                    if (cn == 1 && checkIfNotFalse(i, j, deepCopy)) {
-                        drawRactangle(i, j, deepCopy, Color.RED);
-                        
+                    if (cn == 1 ) {
+                        minutias.add(new Minutia(i,j,1));
+
                     }
 
-                    if(cn == 3 && checkIfNotFalse(i, j, deepCopy)) {
-                        drawRactangle(i, j, deepCopy, Color.BLUE);
+                    if(cn == 3) {
+                        minutias.add(new Minutia(i,j,3));
                     }
                 }
             }
         }
+        removeFalseMinutiae(minutias, deepCopy);
+        drawMinutiae(deepCopy, minutias);
         return deepCopy;
     }
 
-    private boolean checkIfNotFalse(int x, int y, BufferedImage deepCopy) {
-        int marginWidth = (int) (deepCopy.getWidth() * 0.1);
-        int marginHeight = (int) (deepCopy.getHeight() * 0.1);
-        if(x - marginWidth > 0 && y - marginHeight > 0 && x + marginWidth < deepCopy.getWidth() && y + marginHeight < deepCopy.getHeight()) {
-            return true;
-        } else return false;
+    private void drawMinutiae(BufferedImage deepCopy, ArrayList<Minutia> minutias) {
+        for (Minutia m:minutias) {
+            if (m.getType() == 1 ) {
+                drawRactangle(m.getX(), m.getY(), deepCopy, Color.RED);
+
+            }
+
+            if(m.getType()  == 3) {
+                drawRactangle(m.getX(), m.getY(),  deepCopy, Color.BLUE);
+            }
+        }
+    }
+
+    public void removeFalseMinutiae(ArrayList<Minutia> minutias, BufferedImage deepCopy) {
+        Iterator<Minutia> i = minutias.iterator();
+
+        int[][] mask = new int[deepCopy.getWidth()][deepCopy.getHeight()];
+        createMask(mask, deepCopy);
+        while (i.hasNext()) {
+            Minutia m = i.next();
+            if(minutias.stream().anyMatch(e -> (Math.abs(e.getX() - m.getX()) < 6) && (Math.abs(e.getY() - m.getY()) < 6) && m != e)) {
+                i.remove();
+            } else if(mask[m.getX()][m.getY()] == 1) {
+                i.remove();
+            }
+
+        }
+
+
+
+    }
+
+    private void createMask(int[][] mask, BufferedImage image) {
+
+        for(int i = 0; i < image.getWidth(); i++) {
+            for(int j = 0; j < image.getHeight(); j++) {
+                if(image.getRGB(i,j) == Color.BLACK.getRGB()) {
+                    mask[i][j] = 1;
+                    break;
+                } else mask[i][j] = 1;
+            }
+        }
+
+        for(int i = image.getWidth()-1; i >= 0; i--) {
+            for(int j = image.getHeight()-1; j >= 0; j--) {
+                if(image.getRGB(i,j) == Color.BLACK.getRGB()) {
+                    mask[i][j] = 1;
+                    break;
+                } else mask[i][j] = 1;
+            }
+        }
+
+        for(int i = 0; i < image.getHeight(); i++) {
+            for(int j = 0; j < image.getWidth(); j++) {
+                if(image.getRGB(j,i) == Color.BLACK.getRGB()) {
+                    mask[j][i] = 1;
+                    break;
+                } else mask[j][i] = 1;
+            }
+        }
+
+        for(int i = image.getHeight()-1; i >= 0; i--) {
+            for(int j = image.getWidth()-1; j >= 0; j--) {
+                if(image.getRGB(j,i) == Color.BLACK.getRGB()) {
+                    mask[j][i] = 1;
+                    break;
+                } else mask[j][i] = 1;
+            }
+        }
     }
 
     private void drawRactangle(int x, int y, BufferedImage image, Color color) {
